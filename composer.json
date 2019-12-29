@@ -1,0 +1,21 @@
+{
+    "name": "weskiller/enum",
+    "description": "more smart enum by annotation",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "weskiller",
+            "email": "weskiller@vip.qq.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Weskiller\\Enum\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^7.4"
+    }
+}
