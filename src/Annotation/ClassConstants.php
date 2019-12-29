@@ -38,7 +38,7 @@ class ClassConstants
     private function analyseAnnotation()
     {
         $annotations = [];
-        if(preg_match_all('/@([a-zA-Z_]+)[\s]+(.+)[\s]+\n/i',$this->reflectionClassConstant->getDocComment(),$matches)) {
+        if(preg_match_all('/@([a-zA-Z_]+)[\s]+(.+)[\s]*\n/i',$this->reflectionClassConstant->getDocComment(),$matches)) {
             $count = count($matches[1]);
             for($i = 0 ;$i < $count ;$i++) {
                 $var = $matches[1][$i];
