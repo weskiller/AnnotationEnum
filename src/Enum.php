@@ -1,8 +1,9 @@
 <?php
 
-namespace Weskiller\Enum\Contract;
+namespace Weskiller\Enum;
 
 use Weskiller\Enum\Annotation\ClassConstants;
+use Weskiller\Enum\Contract\EnumInterface;
 use Weskiller\Enum\Exception\AssignToEnumException;
 use Weskiller\Enum\Exception\InvalidEnumConstantException;
 
