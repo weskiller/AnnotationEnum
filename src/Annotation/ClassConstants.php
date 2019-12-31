@@ -26,22 +26,24 @@ class ClassConstants
         $this->reflectionClassConstant = new \ReflectionClassConstant($class,$constantName);
     }
 
-    private function getAnnotations()
+    private function getAnnotations(string $prefix = '')
     {
         if(!$this->deal) {
-            $this->annotations = $this->analyseAnnotation();
+            $this->annotations = $this->analyseAnnotation($prefix);
             $this->deal = true;
         }
         return $this->annotations;
     }
 
-    private function analyseAnnotation()
+    private function analyseAnnotation(string $prefix)
     {
         $annotations = [];
-        if(preg_match_all('/@([a-zA-Z_]+)[\s]+(.+)[\s]*\n/i',$this->reflectionClassConstant->getDocComment(),$matches)) {
+        var_dump(__LINE__,$prefix,$this->reflectionClassConstant->getDocComment(),'/@(' . $prefix . '[a-zA-Z_]+)[\s]+(.+)[\s]*\n/i');
+        if(preg_match_all('/@(' . $prefix . '[a-zA-Z_]+)[\s]+(.+)[\s]*\n/i',$this->reflectionClassConstant->getDocComment(),$matches)) {
+            var_dump(__LINE__);
             $count = count($matches[1]);
             for($i = 0 ;$i < $count ;$i++) {
-                $var = $matches[1][$i];
+                $var = substr($matches[1][$i],strlen($prefix));
                 $val = trim($matches[2][$i]);
 
                 //string
@@ -100,9 +102,9 @@ class ClassConstants
         return call_user_func($callback);
     }
 
-    public function get($name)
+    public function get($name,string $prefix = '')
     {
-        $value = $this->getAnnotations()[$name] ?? null;
+        $value = $this->getAnnotations($prefix)[$name] ?? null;
         if($value instanceof \Closure) {
             $void = new Class {};
             return $value->call($void);

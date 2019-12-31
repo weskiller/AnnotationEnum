@@ -36,34 +36,5 @@ interface EnumInterface
      * @param $elements
      * @return bool
      */
-    public function in(array $elements) : bool;
-
-    /**
-     * Convert To String
-     * @return mixed
-     */
-    public function __toString();
-
-    /**
-     * Static Call Magic Function
-     * @param $name
-     * @param $arguments
-     * @return mixed
-     */
-    public static function __callStatic($name, $arguments);
-
-    /**
-     * Get Magic Function
-     * @param $name
-     * @return mixed
-     */
-    public function __get($name);
-
-    /**
-     * Set Magic Function
-     * @param $name
-     * @param $value
-     * @return mixed
-     */
-    public function __set($name, $value);
+    public function in($elements) : bool;
 }
