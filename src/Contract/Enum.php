@@ -19,56 +19,56 @@ abstract class Enum implements EnumInterface
 
     protected ClassConstants $annotation;
 
-    public string $name;
+    public string $key;
 
     public string $value;
 
     protected string $annotationPrefix = '';
 
-    public function __construct($name)
+    public array $groups = [];
+
+    public function __construct($key)
     {
-        static::validateConstantName($name);
-        $this->name = $name;
-        $this->value = static::getConstant($this->name);
-        $this->annotation = $this->registerAnnotation();
+        $this->value = static::validateConstantKey($key);
+        $this->key = $key;
+        $this->annotation = $this->getConstantAnnotation();
     }
 
-    public static function instance($name)
+    public static function instance($key)
     {
-        return new static($name);
+        return new static($key);
     }
 
-    public static function coerce($input,...$values)
+    public static function coerce($input)
     {
-        if(static::valueOfConstantName($input)) {
-            return new static($input, static::transferArguments($values));
+        if(static::valueOfConstantKey($input)) {
+            return new static($input);
         }
-        else if($name = static::nameOfConstantValue($input)) {
-            return new static($name,static::transferArguments($values));
+        else if($key = static::keyOfConstantValue($input)) {
+            return new static($key);
         }
         return null;
     }
 
-    protected function registerAnnotation()
+    protected function getConstantAnnotation()
     {
-        if(!isset(static::$constantAnnotations[$this->name])) {
-            static::$constantAnnotations[$this->name] = new ClassConstants(static::class,$this->name);
+        if(!isset(static::$constantAnnotations[$this->key])) {
+            static::$constantAnnotations[$this->key] = new ClassConstants(static::class,$this->key);
         }
-        return static::$constantAnnotations[$this->name];
+        return static::$constantAnnotations[$this->key];
     }
 
-    private static function getReflectionClass()
+    protected static function getReflectionClass()
     {
-        $class = static::class;
-        if(! isset(self::$enumReflection[$class])) {
-            self::$enumReflection[$class] = new \ReflectionClass($class);
+        if(! isset(self::$enumReflection[static::class])) {
+            self::$enumReflection[static::class] = new \ReflectionClass(static::class);
         }
-        return self::$enumReflection[$class];
+        return self::$enumReflection[static::class];
     }
 
-    public static function getConstant(string $name)
+    public static function getConstant(string $key)
     {
-        return self::getConstants()[$name] ?? null;
+        return self::getConstants()[$key] ?? null;
     }
 
     public static function getConstants() : array
@@ -76,32 +76,51 @@ abstract class Enum implements EnumInterface
         return self::getReflectionClass()->getConstants();
     }
 
-    public static function hasConstant(string $name) :bool
+    public static function hasConstant(string $key) :bool
     {
-        return isset(self::getConstants()[$name]);
+        return isset(self::getConstants()[$key]);
     }
 
-    public static function nameOfConstantValue($value)
+    public static function getKeys()
     {
-        return array_search($value,static::getConstants());
+        return array_keys(static::getConstants());
     }
 
-    public static function valueOfConstantName($name)
+    public static function valueOfConstantKey($key)
     {
-        return static::getConstant($name);
+        return static::getConstant($key);
     }
 
-    protected static function validateConstantName(string $element)
+    protected static function validateConstantKey(string $element)
     {
         if (!$value = static::hasConstant($element)) {
-            throw new InvalidEnumConstantException(sprintf('invalid enum constants name %s::%s', static::class, $element));
+            throw new InvalidEnumConstantException(sprintf('invalid enum constants key %s::%s', static::class, $element));
         }
         return static::getConstant($element);
     }
 
+    public static function validateConstantKeys(array $elements)
+    {
+        $result = [];
+        foreach ($elements as $key) {
+            $result[$key] = static::validateConstantKey($key);
+        }
+        return $result;
+    }
+
+    public static function getValues()
+    {
+        return array_values(static::getConstants());
+    }
+
+    public static function keyOfConstantValue($value)
+    {
+        return array_search($value,static::getConstants());
+    }
+
     protected static function validateConstantValue($element)
     {
-        if (!$name = static::nameOfConstantValue($element)) {
+        if (!$name = static::keyOfConstantValue($element)) {
             throw new InvalidEnumConstantException(sprintf('invalid enum constants value %s::%s', static::class, $element));
         }
         return $name;
@@ -111,16 +130,7 @@ abstract class Enum implements EnumInterface
     {
         $result = [];
         foreach ($elements as $value) {
-            $result[$value] = static::nameOfConstantValue($value);
-        }
-        return $result;
-    }
-
-    public static function validateConstantNames(array $elements)
-    {
-        $result = [];
-        foreach ($elements as $name) {
-            $result[$name] = static::validateConstantName($name);
+            $result[$value] = static::keyOfConstantValue($value);
         }
         return $result;
     }
@@ -138,18 +148,93 @@ abstract class Enum implements EnumInterface
         return (string) $this->value;
     }
 
-    public function __get($name)
+    public function __get($key)
     {
-        return $this->annotation->get($name,$this->annotationPrefix);
+        return $this->annotation->get($key,$this->annotationPrefix);
     }
 
-    public function __set($name, $value)
+    public function __set($key, $value)
     {
-        throw new AssignToEnumException(sprintf('assign %s to %s->%s', $value, static::class, $name));
+        throw new AssignToEnumException(sprintf('assign %s to %s->%s', $value, static::class, $key));
     }
 
+    public static function __callStatic($key, $arguments)
+    {
+        return static::instance($key);
+    }
+
+    /**
+     * @param array $values
+     * @return array|mixed
+     */
     protected static function transferArguments(array $values)
     {
         return (array) count($values) > 1 ? $values : $values[0];
+    }
+
+    public function is($element): bool
+    {
+        return $this->value == ($element instanceof static ? $element->value : $element);
+    }
+
+    public function in($values): bool
+    {
+        foreach ($values as $value) {
+            if($this->is($value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return array
+     */
+    public function getGroups(): array
+    {
+        return $this->groups;
+    }
+    /**
+     * @param array $groups
+     */
+    public function setGroups(array $groups): void
+    {
+        foreach ($groups as $group) {
+            static::validateConstantKeys($group);
+        }
+        $this->groups = $groups;
+    }
+
+    public function getGroup(string $name)
+    {
+        return $this->hasGroup($name) ? $this->groups[$name] : null;
+    }
+
+    public function addGroup(string $name,array $value) :void
+    {
+        static::validateConstantKeys($value);
+        $this->groups[$name] = $value;
+    }
+
+    public function removeGroup(string $name) :bool
+    {
+        if($this->hasGroup($name)) {
+            unset($this->groups[$name]);
+            return true;
+        }
+        return false;
+    }
+
+    public function hasGroup(string $name) : bool
+    {
+        return isset($this->groups[$name]);
+    }
+
+    public function isInGroup(string $name) :bool
+    {
+        if($this->hasGroup($name)) {
+            return $this->in($this->getGroup($name));
+        }
+        return false;
     }
 }

@@ -38,7 +38,6 @@ class ClassConstants
     private function analyseAnnotation(string $prefix)
     {
         $annotations = [];
-        var_dump(__LINE__,$prefix,$this->reflectionClassConstant->getDocComment(),'/@(' . $prefix . '[a-zA-Z_]+)[\s]+(.+)[\s]*\n/i');
         if(preg_match_all('/@(' . $prefix . '[a-zA-Z_]+)[\s]+(.+)[\s]*\n/i',$this->reflectionClassConstant->getDocComment(),$matches)) {
             var_dump(__LINE__);
             $count = count($matches[1]);
@@ -106,8 +105,7 @@ class ClassConstants
     {
         $value = $this->getAnnotations($prefix)[$name] ?? null;
         if($value instanceof \Closure) {
-            $void = new Class {};
-            return $value->call($void);
+            return call_user_func($value);
         }
         return $value;
     }

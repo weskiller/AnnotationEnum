@@ -6,10 +6,10 @@ interface EnumInterface
 {
     /**
      * Sure EnumClass Has A Constant
-     * @param string $name
+     * @param string $key
      * @return bool
      */
-    public static function hasConstant(string $name) : bool;
+    public static function hasConstant(string $key) : bool;
 
     /**
      * Get EnumClass All Constants
@@ -19,10 +19,22 @@ interface EnumInterface
 
     /**
      * Get EnumClass A Constant Value
-     * @param string $name
+     * @param string $key
      * @return mixed
      */
-    public static function getConstant(string $name);
+    public static function getConstant(string $key);
+
+    /**
+     * Get EnumClass all key
+     * @return mixed
+     */
+    public static function getKeys();
+
+    /**
+     * Get EnumClass all value
+     * @return mixed
+     */
+    public static function getValues();
 
     /**
      * compare value
