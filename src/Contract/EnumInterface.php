@@ -2,6 +2,10 @@
 
 namespace Weskiller\Enum\Contract;
 
+/**
+ * Interface EnumInterface
+ * @package Weskiller\Enum\Contract
+ */
 interface EnumInterface
 {
     /**

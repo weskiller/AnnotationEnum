@@ -4,14 +4,29 @@ namespace Weskiller\Enum;
 
 use Weskiller\Enum\Exception\InvalidEnumConstantException;
 
+/**
+ * Class FlagValueEnum
+ * @package Weskiller\Enum
+ */
 class FlagValueEnum extends UniqueValueEnum
 {
+    /**
+     * @param array $flags
+     * @return Contract\Enum|null
+     * @throws InvalidEnumConstantException
+     * @throws \ReflectionException
+     */
     public static function flags(array $flags = [])
     {
         self::validateConstantValues($flags);
         return static::instance(static::orFLags($flags));
     }
 
+    /**
+     * @param mixed ...$flags
+     * @return int
+     * @throws InvalidEnumConstantException
+     */
     public function hasFlags(...$flags)
     {
         $flags = static::transferArguments($flags);
@@ -20,6 +35,10 @@ class FlagValueEnum extends UniqueValueEnum
         return $value == $this->value & $value;
     }
 
+    /**
+     * @param mixed ...$flags
+     * @throws InvalidEnumConstantException
+     */
     public function addFlags(...$flags)
     {
         $flags = static::transferArguments($flags);
@@ -27,6 +46,10 @@ class FlagValueEnum extends UniqueValueEnum
         $this->value |= static::orFLags($flags);
     }
 
+    /**
+     * @param mixed ...$flags
+     * @throws InvalidEnumConstantException
+     */
     public function removeFlags(...$flags)
     {
         $flags = static::transferArguments($flags);
@@ -36,6 +59,11 @@ class FlagValueEnum extends UniqueValueEnum
         }
     }
 
+    /**
+     * @param mixed ...$flags
+     * @return bool
+     * @throws InvalidEnumConstantException
+     */
     protected static function validateFlags(... $flags)
     {
         foreach ($flags as $flag) {
@@ -48,6 +76,10 @@ class FlagValueEnum extends UniqueValueEnum
         return true;
     }
 
+    /**
+     * @param array $flags
+     * @return int|mixed
+     */
     public static function orFLags(array $flags)
     {
         $result = 0;
@@ -57,6 +89,9 @@ class FlagValueEnum extends UniqueValueEnum
         return $result;
     }
 
+    /**
+     * @return string
+     */
     public function getBitString()
     {
         return decbin($this->value);
